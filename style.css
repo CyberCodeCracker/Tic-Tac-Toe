@@ -13,15 +13,15 @@ body {
 }
 
 .game-board {
-    height: 100vh;
-    width: 100vw;
+    height: 50vh;
+    width: 50vw;
     display: grid;
     grid-template-columns: repeat(3, auto);
     justify-content: center;
     align-content: center;
     justify-items: center;
     align-items: center;
-    gap: 1px solid #000000;
+    background-color: black;
 }
 
 .cell {
