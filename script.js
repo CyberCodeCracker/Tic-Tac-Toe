@@ -1,9 +1,13 @@
+const cells = document.querySelectorAll('[data-cell]');
+const outcomeMessage = document.querySelector('.outcome-message');
+const clearButton = document.querySelector('#clear-btn');
+
 const gameBoard = (() => {
     const board = ['', '', '', '', '', '', '', '', ''];
     const getBoard = () => board;
 
     const makeMove = (index, player) => {
-        if(board[index] === '') {
+        if (board[index] === '') {
             board[index] = player.getSymbol();
             return true;
         }
@@ -23,7 +27,7 @@ const Player = (name, symbol) => {
     const getSymbol = () => symbol;
     const getName = () => name;
 
-    return { getSymbol, getName };
+    return { getName, getSymbol };
 };
 
 const displayController = (() => {
@@ -40,18 +44,18 @@ const displayController = (() => {
 
     const checkWin = (board, player) => {
         const winCombinations = [[0, 1, 2], [3, 4, 5], [6, 7, 8],   // Rows
-                                 [0, 3, 6], [1, 4, 7], [2, 5, 8],   // Columns
-                                 [0, 4, 8], [2, 4, 6]               // Diagonals
-    ];
+        [0, 3, 6], [1, 4, 7], [2, 5, 8],                            // Columns
+        [0, 4, 8], [2, 4, 6]                                        // Diagonals
+        ];
 
-    for (combiantion in winCombinations) {
-        const [a, b, c] = combination;
-        
-        if (board[a] === player.getSymbol() && board[b] === player.getSymbol() && board[c] === player.getSymbol()) {
-            return true;
+        for (const combination of winCombinations) {
+            const [a, b, c] = combination;
+
+            if (board[a] === player.getSymbol() && board[b] === player.getSymbol() && board[c] === player.getSymbol()) {
+                return true;
+            }
         }
-    }
-    return false;
+        return false;
     };
 
     const checkDraw = (board) => {
@@ -61,16 +65,21 @@ const displayController = (() => {
         return isDraw && !isWin;
     };
 
+    // Plays a turn and then switches player
     const playTurn = (index) => {
         if (!gameOver) {
             if (gameBoard.makeMove(index, currentPlayer)) {
-                if (checkWin(gameBoard(), currentPlayer)) {
+                if (checkWin(gameBoard.getBoard(), currentPlayer)) {
                     gameOver = true;
+                    outcomeMessage.style.display = 'flex';
+                    displayOutcomeMessage(`${currentPlayer.getName()} Wins!`);
                 } else if (checkDraw(gameBoard.getBoard())) {
                     gameOver = true;
+                    outcomeMessage.style.display = 'flex';
+                    displayOutcomeMessage(`It's a Draw!`);
+                } else {
+                    switchPlayer(); 
                 }
-            } else {
-                switchPlayer();
             }
         }
     };
@@ -79,7 +88,49 @@ const displayController = (() => {
         currentPlayer = player1;
         gameOver = false;
         gameBoard.resetBoard();
+    
+        // Clear the board by removing child elements from each cell
+        cells.forEach((cell) => {
+            cell.textContent = '';
+        });
+    
+        outcomeMessage.style.display = 'none';
     };
 
+    const displayOutcomeMessage = (message) => {
+        outcomeMessage.textContent = message;
+    };
+
+    cells.forEach((cell, index) => {
+      cell.addEventListener('click', () => {
+        if (!gameOver && cell.textContent === '') {
+            const mark = document.createElement('div');
+            mark.classList.add('mark');
+
+            mark.textContent = currentPlayer.getSymbol();
+
+            cell.appendChild(mark);
+            playTurn(index);
+        }
+      });
+    });    
+
     return { startGame, playTurn };
-})(); 
+})();
+
+outcomeMessage.addEventListener('click', () => {
+    outcomeMessage.style.display = 'none';
+    outcomeMessage.textContent = '';
+})
+
+clearButton.addEventListener('click', () => {
+    displayController.startGame(); 
+});
+
+displayController.startGame();
+
+
+
+
+
+
